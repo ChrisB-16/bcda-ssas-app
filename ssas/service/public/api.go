@@ -13,8 +13,8 @@ import (
 	"net/http"
 	"strconv"
 
-	ssas "github.com/CMSgov/bcda-ssas-app/ssas"
-	service "github.com/CMSgov/bcda-ssas-app/ssas/service"
+	"github.com/CMSgov/bcda-ssas-app/ssas"
+	"github.com/CMSgov/bcda-ssas-app/ssas/service"
 	"github.com/go-chi/render"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pborman/uuid"

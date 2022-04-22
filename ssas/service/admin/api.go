@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	ssas "github.com/CMSgov/bcda-ssas-app/ssas"
-	service "github.com/CMSgov/bcda-ssas-app/ssas/service"
+	"github.com/CMSgov/bcda-ssas-app/ssas"
+	"github.com/CMSgov/bcda-ssas-app/ssas/service"
 	"github.com/go-chi/chi"
 )
 

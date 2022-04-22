@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	ssas "github.com/CMSgov/bcda-ssas-app/ssas"
+	"github.com/CMSgov/bcda-ssas-app/ssas"
 )
 
 func WriteHttpError(w http.ResponseWriter, e ssas.ErrorResponse, errorStatus int) {
