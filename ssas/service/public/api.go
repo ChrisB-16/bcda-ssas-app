@@ -99,7 +99,7 @@ func VerifyPassword(w http.ResponseWriter, r *http.Request) {
 	ssas.OperationCalled(event)
 	passwordResponse, oktaId, err := GetProvider().VerifyPassword(passReq.LoginID, passReq.Password, trackingID)
 	if err != nil {
-		jsonError(w, http.StatusBadRequest, "invalid_client_metadata", err.Error())
+		jsonError(w, http.StatusUnauthorized, "invalid_client_metadata", err.Error())
 		return
 	}
 
@@ -224,7 +224,7 @@ func VerifyMultifactorResponse(w http.ResponseWriter, r *http.Request) {
 
 	if mfaReq.Passcode == nil {
 		service.LogEntrySetField(r, "bodyStr", bodyStr)
-		jsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body missing passcode")
+		jsonError(w, http.StatusUnauthorized, "invalid_client_metadata", "Request body missing passcode")
 		return
 	}
 
