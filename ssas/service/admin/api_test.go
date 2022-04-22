@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/CMSgov/bcda-ssas-app/ssas/service"
+	service "github.com/CMSgov/bcda-ssas-app/ssas/service"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/CMSgov/bcda-ssas-app/ssas"
+	ssas "github.com/CMSgov/bcda-ssas-app/ssas"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -572,7 +572,7 @@ func (s *APITestSuite) TestDeactivateSystemCredentials() {
 
 func (s *APITestSuite) TestJsonError() {
 	w := httptest.NewRecorder()
-	JsonError(w, http.StatusUnauthorized, "unauthorized")
+	service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
 	resp := w.Result()
 	body, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(s.T(), err)

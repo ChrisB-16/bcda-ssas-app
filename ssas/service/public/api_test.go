@@ -6,8 +6,8 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"fmt"
-	"github.com/CMSgov/bcda-ssas-app/ssas"
-	"github.com/CMSgov/bcda-ssas-app/ssas/service"
+	ssas "github.com/CMSgov/bcda-ssas-app/ssas"
+	service "github.com/CMSgov/bcda-ssas-app/ssas/service"
 	"github.com/go-chi/chi"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pborman/uuid"
@@ -456,7 +456,7 @@ func (s *APITestSuite) TestSaveTokenTime() {
 
 func (s *APITestSuite) TestJsonError() {
 	w := httptest.NewRecorder()
-	JsonError(w, http.StatusText(http.StatusUnauthorized), "unauthorized", "")
+	service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
 	resp := w.Result()
 	body, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(s.T(), err)

@@ -2,10 +2,11 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/CMSgov/bcda-ssas-app/ssas"
-	"gorm.io/gorm"
+	ssas "github.com/CMSgov/bcda-ssas-app/ssas"
+	service "github.com/CMSgov/bcda-ssas-app/ssas/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gorm.io/gorm"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -28,7 +29,7 @@ func (s *APICommonTestSuite) TearDownSuite() {
 func (s *APICommonTestSuite) TestJsonError() {
 	// JSON output is valid for simple strings
 	w := httptest.NewRecorder()
-	JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
+	service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
 	resp := w.Result()
 	body, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(s.T(), err)
@@ -37,7 +38,7 @@ func (s *APICommonTestSuite) TestJsonError() {
 
 	// JSON output is valid for strings that need to be escaped
 	w = httptest.NewRecorder()
-	JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), `oh no, there's a database problem (and a backslash \)!: pq: duplicate key value violates unique constraint "groups_group_id_deleted_at_key"`)
+	service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), `oh no, there's a database problem (and a backslash \)!: pq: duplicate key value violates unique constraint "groups_group_id_deleted_at_key"`)
 	resp = w.Result()
 	body, err = ioutil.ReadAll(resp.Body)
 	assert.NoError(s.T(), err)
