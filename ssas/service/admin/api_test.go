@@ -572,7 +572,7 @@ func (s *APITestSuite) TestDeactivateSystemCredentials() {
 
 func (s *APITestSuite) TestJsonError() {
 	w := httptest.NewRecorder()
-	JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
+	service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
 	resp := w.Result()
 	body, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(s.T(), err)
