@@ -558,7 +558,7 @@ func tokenV2(w http.ResponseWriter, r *http.Request) {
 	if claims.Subject != claims.Issuer {
 		event.Help = "subject (sub) and issuer (iss) claims do not match"
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, "subject (sub) and issuer (iss) claims do not match", "")
+		service.JsonError(w, http.StatusBadRequest, "subject (sub) and issuer (iss) claims do not match", "")
 		return
 	}
 
@@ -572,7 +572,7 @@ func tokenV2(w http.ResponseWriter, r *http.Request) {
 	if claims.Audience != server.GetClientAssertionAudience() {
 		event.Help = "invalid audience (aud) claim"
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, "invalid audience (aud) claim", "")
+		service.JsonError(w, http.StatusBadRequest, "invalid audience (aud) claim", "")
 		return
 	}
 
@@ -580,7 +580,7 @@ func tokenV2(w http.ResponseWriter, r *http.Request) {
 	if tokenDuration > 300 { //5 minute max duration
 		event.Help = "IssuedAt (iat) and ExpiresAt (exp) claims are more than 5 minutes apart"
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, "IssuedAt (iat) and ExpiresAt (exp) claims are more than 5 minutes apart", "")
+		service.JsonError(w, http.StatusBadRequest, "IssuedAt (iat) and ExpiresAt (exp) claims are more than 5 minutes apart", "")
 		return
 	}
 

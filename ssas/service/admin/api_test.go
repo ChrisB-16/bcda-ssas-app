@@ -958,12 +958,17 @@ func (s *APITestSuite) TestCreateV2SystemWithMissingPublicKey() {
 	req := httptest.NewRequest("POST", "/v2/system", strings.NewReader(`{"client_name": "Test Client", "group_id": "test-group-id", "scope": "bcda-api", "tracking_id": "T00000"}`))
 	handler := http.HandlerFunc(createV2System)
 	rr := httptest.NewRecorder()
+
 	handler.ServeHTTP(rr, req)
+
+	resp := rr.Result()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), http.StatusBadRequest, rr.Result().StatusCode)
-	var result map[string]interface{}
-	_ = json.Unmarshal(rr.Body.Bytes(), &result)
 	assert.Empty(s.T(), result["client_token"])
-	assert.Equal(s.T(), "could not create v2 system; public key is required", result["error_description"])
+	assert.True(s.T(), json.Valid(body))
+	assert.Equal(s.T(), `{"error":"","error_description":"could not create v2 system; public key is required"}`, string(body))
 
 	err = ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)

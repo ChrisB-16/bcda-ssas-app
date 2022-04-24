@@ -170,7 +170,7 @@ func (s *APITestSuite) TestResetSecretNoSystem() {
 
 	req = addRegDataContext(req, groupID, []string{groupID})
 	http.HandlerFunc(ResetSecret).ServeHTTP(s.rr, req)
-	assert.Equal(s.T(), http.StatusBadRequest, s.rr.Code)
+	assert.Equal(s.T(), http.StatusUnauthorized, s.rr.Code)
 	assert.Contains(s.T(), s.rr.Body.String(), "not found")
 
 	err = ssas.CleanDatabase(group)
@@ -569,7 +569,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTUsingWrongPrivateKey() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "crypto/rsa: verification error")
+	s.verifyErrorResponse(http.StatusUnauthorized, "crypto/rsa: verification error")
 	err := ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -594,7 +594,7 @@ func (s *APITestSuite) TestAuthenticatingWithMismatchLocation() {
 
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
-	assert.Equal(s.T(), http.StatusBadRequest, s.rr.Code)
+	assert.Equal(s.T(), http.StatusUnauthorized, s.rr.Code)
 	err := ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -619,7 +619,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTWithExpBeforeIssuedTime() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "token used before issued")
+	s.verifyErrorResponse(http.StatusUnauthorized, "token used before issued")
 	err := ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -645,7 +645,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTWithMoreThan5MinutesExpTime() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "IssuedAt (iat) and ExpiresAt (exp) claims are more than 5 minutes apart")
+	s.verifyErrorResponse(http.StatusUnauthorized, "IssuedAt (iat) and ExpiresAt (exp) claims are more than 5 minutes apart")
 	err := ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -671,7 +671,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTWithExpiredToken() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "token is expired")
+	s.verifyErrorResponse(http.StatusUnauthorized, "token is expired")
 	err := ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -700,7 +700,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTSignedWithWrongKey() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "crypto/rsa: verification error")
+	s.verifyErrorResponse(http.StatusUnauthorized, "crypto/rsa: verification error")
 	err = ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -745,7 +745,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTWithSoftDeletedPublicKey() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "key not found for system: "+creds.ClientToken)
+	s.verifyErrorResponse(http.StatusUnauthorized, "key not found for system: "+creds.ClientToken)
 	err = ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -768,7 +768,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTWithMissingIssuerClaim() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "missing issuer (iss) in jwt claims")
+	s.verifyErrorResponse(http.StatusUnauthorized, "missing issuer (iss) in jwt claims")
 	err := ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -791,7 +791,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTWithBadAudienceClaim() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "invalid audience (aud) claim")
+	s.verifyErrorResponse(http.StatusUnauthorized, "invalid audience (aud) claim")
 	err := ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -824,7 +824,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTWithMissingKID() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "missing public key id (kid) in jwt header")
+	s.verifyErrorResponse(http.StatusUnauthorized, "missing public key id (kid) in jwt header")
 	err = ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -851,7 +851,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTWithMissingJTI() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "missing Token ID (jti) claim")
+	s.verifyErrorResponse(http.StatusUnauthorized, "missing Token ID (jti) claim")
 	err = ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -867,7 +867,7 @@ func (s *APITestSuite) TestAuthenticatingWithJWTWithMissingSubjectClaim() {
 	handler := http.HandlerFunc(tokenV2)
 	handler.ServeHTTP(s.rr, req)
 
-	s.verifyErrorResponse(http.StatusBadRequest, "subject (sub) and issuer (iss) claims do not match")
+	s.verifyErrorResponse(http.StatusUnauthorized, "subject (sub) and issuer (iss) claims do not match")
 	err := ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
 }
@@ -902,7 +902,7 @@ func (s *APITestSuite) TestClientAssertionAuthWithBadScopeParam() {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	handler.ServeHTTP(s.rr, req)
-	s.verifyErrorResponse(http.StatusBadRequest, "invalid scope value")
+	s.verifyErrorResponse(http.StatusUnauthorized, "invalid scope value")
 }
 
 func (s *APITestSuite) TestClientAssertionAuthWithBadAcceptHeader() {
@@ -915,7 +915,7 @@ func (s *APITestSuite) TestClientAssertionAuthWithBadAcceptHeader() {
 	req.Header.Set("Accept", "application/txt")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	handler.ServeHTTP(s.rr, req)
-	s.verifyErrorResponse(http.StatusBadRequest, "invalid Accept header value. Supported types: [application/json]")
+	s.verifyErrorResponse(http.StatusUnauthorized, "invalid Accept header value. Supported types: [application/json]")
 }
 
 func (s *APITestSuite) TestClientAssertionAuthWithBadContentTypeHeader() {
@@ -927,14 +927,14 @@ func (s *APITestSuite) TestClientAssertionAuthWithBadContentTypeHeader() {
 	req := httptest.NewRequest("POST", "/v2/token", strings.NewReader(form.Encode()))
 	req.Header.Set("Accept", "application/json")
 	handler.ServeHTTP(s.rr, req)
-	s.verifyErrorResponse(http.StatusBadRequest, "missing Content-Type header")
+	s.verifyErrorResponse(http.StatusUnauthorized, "missing Content-Type header")
 
 	//Invalid Content-Type header value
 	req = httptest.NewRequest("POST", "/v2/token", strings.NewReader(form.Encode()))
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/bad-type")
 	handler.ServeHTTP(s.rr, req)
-	s.verifyErrorResponse(http.StatusBadRequest, "invalid Content Type Header value. Supported Types: [application/x-www-form-urlencoded]")
+	s.verifyErrorResponse(http.StatusUnauthorized, "invalid Content Type Header value. Supported Types: [application/x-www-form-urlencoded]")
 }
 
 func (s *APITestSuite) TestClientAssertionAuthWithBadGrantTypeParam() {
@@ -948,7 +948,7 @@ func (s *APITestSuite) TestClientAssertionAuthWithBadGrantTypeParam() {
 	req.Header.Add("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	handler.ServeHTTP(s.rr, req)
-	s.verifyErrorResponse(http.StatusBadRequest, "invalid value for grant_type")
+	s.verifyErrorResponse(http.StatusUnauthorized, "invalid value for grant_type")
 }
 
 func (s *APITestSuite) TestClientAssertionAuthWithBadClientAssertionTypeParam() {
@@ -962,7 +962,7 @@ func (s *APITestSuite) TestClientAssertionAuthWithBadClientAssertionTypeParam() 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	handler.ServeHTTP(s.rr, req)
-	s.verifyErrorResponse(http.StatusBadRequest, "invalid value for client_assertion_type")
+	s.verifyErrorResponse(http.StatusUnauthorized, "invalid value for client_assertion_type")
 }
 
 func (s *APITestSuite) TestClientAssertionAuthWithMissingClientAssertionParam() {
@@ -977,7 +977,7 @@ func (s *APITestSuite) TestClientAssertionAuthWithMissingClientAssertionParam() 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	handler.ServeHTTP(s.rr, req)
-	s.verifyErrorResponse(http.StatusBadRequest, "missing client_assertion")
+	s.verifyErrorResponse(http.StatusUnauthorized, "missing client_assertion")
 }
 
 func (s *APITestSuite) verifyErrorResponse(expectedStatus interface{}, expectedMsg string) {
@@ -1039,13 +1039,17 @@ func (s *APITestSuite) TestGetTokenInfoWithMissingToken() {
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rCtx))
 	handler := http.HandlerFunc(validateAndParseToken)
 	rr := httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-	assert.Equal(s.T(), http.StatusBadRequest, rr.Result().StatusCode)
 
-	var resMap map[string]string
-	err := json.NewDecoder(rr.Body).Decode(&resMap)
+	handler.ServeHTTP(rr, req)
+	assert.Equal(s.T(), http.StatusUnauthorized, rr.Result().StatusCode)
+	service.JsonError(w, http.StatusUnauthorized, "", "missing \"token\" field in body")
+
+	resp := rr.Result()
+	body, err := ioutil.ReadAll(resp.Body)
+
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), "missing \"token\" field in body", resMap["error_description"])
+	assert.True(s.T(), json.Valid(body))
+	assert.Equal(s.T(), `{"error":"","error_description":"missing \"token\" field in body"}`, string(body))
 }
 
 func (s *APITestSuite) TestGetTokenInfoWithEmptyToken() {
@@ -1056,7 +1060,7 @@ func (s *APITestSuite) TestGetTokenInfoWithEmptyToken() {
 	handler := http.HandlerFunc(validateAndParseToken)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	assert.Equal(s.T(), http.StatusBadRequest, rr.Result().StatusCode)
+	assert.Equal(s.T(), http.StatusUnauthorized, rr.Result().StatusCode)
 
 	var resMap map[string]string
 	err := json.NewDecoder(rr.Body).Decode(&resMap)

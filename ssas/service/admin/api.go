@@ -186,9 +186,9 @@ func getSystem(w http.ResponseWriter, r *http.Request) {
 
 	s, err := ssas.GetSystemByID(id)
 	if err != nil {
-		systemEvent.Help = fmt.Sprintf("could not find system %s", id)
+		systemEvent.Help = fmt.Sprintf("; could not find system %s", id)
 		ssas.OperationFailed(systemEvent)
-		service.JsonError(w, http.StatusNotFound, fmt.Sprintf("could not find system %s", id), "")
+		service.JsonError(w, http.StatusNotFound, "", fmt.Sprintf("could not find system %s", id))
 		return
 	}
 
