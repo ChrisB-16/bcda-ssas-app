@@ -8,7 +8,7 @@ import (
 	"github.com/CMSgov/bcda-ssas-app/ssas"
 )
 
-func WriteHttpError(w http.ResponseWriter, e ssas.ErrorResponse, errorStatus int) {
+func WriteHTTPError(w http.ResponseWriter, e ssas.ErrorResponse, errorStatus int) {
 	fallbackMessage := fmt.Sprintf(`{"error": "%s", "error_description": "%s"}`, http.StatusText(http.StatusInternalServerError), http.StatusText(http.StatusInternalServerError))
 	body, err := json.Marshal(e)
 
@@ -25,10 +25,10 @@ func WriteHttpError(w http.ResponseWriter, e ssas.ErrorResponse, errorStatus int
 }
 
 // Follow RFC 7591 format for input errors
-func JsonError(w http.ResponseWriter, errorStatus int, statusText string, statusDescription string) {
+func JSONError(w http.ResponseWriter, errorStatus int, statusText string, statusDescription string) {
 	e := ssas.ErrorResponse{Error: statusText, ErrorDescription: statusDescription}
 
-	WriteHttpError(w, e, errorStatus)
+	WriteHTTPError(w, e, errorStatus)
 
 	ssas.Logger.Printf("%s; %s", statusDescription, statusText) // TODO: log information about the request
 }

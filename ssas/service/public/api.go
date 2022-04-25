@@ -83,14 +83,14 @@ func VerifyPassword(w http.ResponseWriter, r *http.Request) {
 
 	bodyStr, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
 		return
 	}
 
 	err = json.Unmarshal(bodyStr, &passReq)
 	if err != nil {
 		service.LogEntrySetField(r, "bodyStr", "<redacted>")
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
 		return
 	}
 
@@ -99,7 +99,7 @@ func VerifyPassword(w http.ResponseWriter, r *http.Request) {
 	ssas.OperationCalled(event)
 	passwordResponse, oktaId, err := GetProvider().VerifyPassword(passReq.LoginID, passReq.Password, trackingID)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, "invalid_client_metadata", err.Error())
+		service.JSONError(w, http.StatusUnauthorized, "invalid_client_metadata", err.Error())
 		return
 	}
 
@@ -107,7 +107,7 @@ func VerifyPassword(w http.ResponseWriter, r *http.Request) {
 		_, passwordResponse.Token, err = MintMFAToken(oktaId)
 	}
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure generating JSON: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -115,7 +115,7 @@ func VerifyPassword(w http.ResponseWriter, r *http.Request) {
 
 	body, err := json.Marshal(passwordResponse)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure generating JSON: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -123,7 +123,7 @@ func VerifyPassword(w http.ResponseWriter, r *http.Request) {
 
 	_, err = w.Write(body)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure writing response body: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -156,14 +156,14 @@ func RequestMultifactorChallenge(w http.ResponseWriter, r *http.Request) {
 
 	bodyStr, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
 		return
 	}
 
 	err = json.Unmarshal(bodyStr, &mfaReq)
 	if err != nil {
 		service.LogEntrySetField(r, "bodyStr", bodyStr)
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
 		return
 	}
 
@@ -172,13 +172,13 @@ func RequestMultifactorChallenge(w http.ResponseWriter, r *http.Request) {
 	ssas.OperationCalled(event)
 	factorResponse, err := GetProvider().RequestFactorChallenge(mfaReq.LoginID, mfaReq.FactorType, trackingID)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, "invalid_client_metadata", err.Error())
+		service.JSONError(w, http.StatusUnauthorized, "invalid_client_metadata", err.Error())
 		return
 	}
 
 	body, err := json.Marshal(factorResponse)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure generating JSON: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -186,7 +186,7 @@ func RequestMultifactorChallenge(w http.ResponseWriter, r *http.Request) {
 
 	_, err = w.Write(body)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure writing response body: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -211,20 +211,20 @@ func VerifyMultifactorResponse(w http.ResponseWriter, r *http.Request) {
 
 	bodyStr, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
 		return
 	}
 
 	err = json.Unmarshal(bodyStr, &mfaReq)
 	if err != nil {
 		service.LogEntrySetField(r, "bodyStr", bodyStr)
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
 		return
 	}
 
 	if mfaReq.Passcode == nil {
 		service.LogEntrySetField(r, "bodyStr", bodyStr)
-		service.JsonError(w, http.StatusUnauthorized, "invalid_client_metadata", "Request body missing passcode")
+		service.JSONError(w, http.StatusUnauthorized, "invalid_client_metadata", "Request body missing passcode")
 		return
 	}
 
@@ -239,7 +239,7 @@ func VerifyMultifactorResponse(w http.ResponseWriter, r *http.Request) {
 
 		_, err = w.Write([]byte(`{"factor_result":"failure"}`))
 		if err != nil {
-			service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+			service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 			event.Help = "failure writing response body: " + err.Error()
 			ssas.OperationFailed(event)
 			return
@@ -247,7 +247,7 @@ func VerifyMultifactorResponse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if empty(groupIDs) {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "no authorized groups"
 		ssas.OperationFailed(event)
 		return
@@ -255,7 +255,7 @@ func VerifyMultifactorResponse(w http.ResponseWriter, r *http.Request) {
 
 	gIdsBytes, err := json.Marshal(groupIDs)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "no authorized groups: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -264,7 +264,7 @@ func VerifyMultifactorResponse(w http.ResponseWriter, r *http.Request) {
 	event.Help = "passcode accepted"
 	ssas.OperationSucceeded(event)
 	if _, ts, err = MintRegistrationToken(oktaID, groupIDs); err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure creating registration token: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -277,14 +277,14 @@ func VerifyMultifactorResponse(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err = json.Marshal(response)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure marshaling JSON for verifyMultifactorResponse: " + err.Error()
 		ssas.OperationFailed(event)
 		return
 	}
 	_, err = w.Write(body)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure writing response body: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -309,35 +309,35 @@ func ResetSecret(w http.ResponseWriter, r *http.Request) {
 
 	if rd, err = readRegData(r); err != nil || rd.GroupID == "" {
 		service.GetLogEntry(r).Println("missing or invalid GroupID")
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "")
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "")
 		return
 	}
 
 	if bodyStr, err = ioutil.ReadAll(r.Body); err != nil {
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
 		return
 	}
 
 	if err = json.Unmarshal(bodyStr, &req); err != nil {
 		service.LogEntrySetField(r, "bodyStr", bodyStr)
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
 		return
 	}
 
 	if sys, err = ssas.GetSystemByClientID(req.ClientID); err != nil {
-		service.JsonError(w, http.StatusUnauthorized, "invalid_client_metadata", "Client not found")
+		service.JSONError(w, http.StatusUnauthorized, "invalid_client_metadata", "Client not found")
 		return
 	}
 
 	if !contains(rd.AllowedGroupIDs, rd.GroupID) || sys.GroupID != rd.GroupID {
-		service.JsonError(w, http.StatusUnauthorized, "invalid_client_metadata", "Invalid group")
+		service.JSONError(w, http.StatusUnauthorized, "invalid_client_metadata", "Invalid group")
 		return
 	}
 
 	event = ssas.Event{Op: "ResetSecret", TrackingID: uuid.NewRandom().String(), Help: "calling from public.ResetSecret()"}
 	ssas.OperationCalled(event)
 	if credentials, err = sys.ResetSecret(trackingID); err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		return
 	}
 
@@ -349,13 +349,13 @@ func ResetSecret(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := json.Marshal(response)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure generating JSON for credential reset: " + err.Error()
 		ssas.OperationFailed(event)
 		return
 	}
 	if _, err = w.Write(body); err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure writing response body: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -382,39 +382,39 @@ func RegisterSystem(w http.ResponseWriter, r *http.Request) {
 	if rd, err = readRegData(r); err != nil || rd.GroupID == "" {
 		service.GetLogEntry(r).Println("missing or invalid GroupID")
 		// Specified in RFC 7592 https://tools.ietf.org/html/rfc7592#page-6
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "")
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "")
 		return
 	}
 
 	bodyStr, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		// Response types and format specified in RFC 7591 https://tools.ietf.org/html/rfc7591#section-3.2.2
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be read")
 		return
 	}
 
 	err = json.Unmarshal(bodyStr, &reg)
 	if err != nil {
 		service.LogEntrySetField(r, "bodyStr", bodyStr)
-		service.JsonError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
+		service.JSONError(w, http.StatusBadRequest, "invalid_client_metadata", "Request body cannot be parsed")
 		return
 	}
 
 	if reg.JSONWebKeys.Keys != nil {
 		if len(reg.JSONWebKeys.Keys) > 1 {
-			service.JsonError(w, http.StatusUnauthorized, "invalid_client_metadata", "Exactly one JWK must be presented")
+			service.JSONError(w, http.StatusUnauthorized, "invalid_client_metadata", "Exactly one JWK must be presented")
 			return
 		}
 
 		publicKeyBytes, err = json.Marshal(reg.JSONWebKeys.Keys[0])
 		if err != nil {
-			service.JsonError(w, http.StatusUnauthorized, "invalid_client_metadata", "Unable to read JWK")
+			service.JSONError(w, http.StatusUnauthorized, "invalid_client_metadata", "Unable to read JWK")
 			return
 		}
 
 		publicKeyPEM, err = ssas.ConvertJWKToPEM(string(publicKeyBytes))
 		if err != nil {
-			service.JsonError(w, http.StatusUnauthorized, "invalid_client_metadata", "Unable to process JWK")
+			service.JSONError(w, http.StatusUnauthorized, "invalid_client_metadata", "Unable to process JWK")
 			return
 		}
 	}
@@ -425,7 +425,7 @@ func RegisterSystem(w http.ResponseWriter, r *http.Request) {
 	ssas.OperationCalled(event)
 	credentials, err := ssas.RegisterSystem(reg.ClientName, rd.GroupID, reg.Scope, publicKeyPEM, reg.IPs, trackingID)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, "invalid_client_metadata", err.Error())
+		service.JSONError(w, http.StatusUnauthorized, "invalid_client_metadata", err.Error())
 		return
 	}
 
@@ -437,7 +437,7 @@ func RegisterSystem(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := json.Marshal(response)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure generating JSON for system creation: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -446,7 +446,7 @@ func RegisterSystem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	_, err = w.Write(body)
 	if err != nil {
-		service.JsonError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
+		service.JSONError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "")
 		event.Help = "failure writing response body: " + err.Error()
 		ssas.OperationFailed(event)
 		return
@@ -478,24 +478,24 @@ type TokenResponse struct {
 func token(w http.ResponseWriter, r *http.Request) {
 	clientID, secret, ok := r.BasicAuth()
 	if !ok {
-		service.JsonError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), "")
+		service.JSONError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), "")
 		return
 	}
 
 	system, err := ssas.GetSystemByClientID(clientID)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid client id")
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid client id")
 		return
 	}
 
 	savedSecret, err := system.GetSecret()
 	if err != nil || !ssas.Hash(savedSecret.Hash).IsHashOf(secret) {
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid client secret")
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid client secret")
 		return
 	}
 
 	if savedSecret.IsExpired() {
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "credentials expired")
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "credentials expired")
 		return
 	}
 
@@ -504,7 +504,7 @@ func token(w http.ResponseWriter, r *http.Request) {
 	data, err := ssas.XDataFor(system)
 	ssas.Logger.Infof("public.api.token: XDataFor(%d) returned '%s'", system.ID, data)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, "no group for system", "")
+		service.JSONError(w, http.StatusUnauthorized, "no group for system", "")
 		return
 	}
 
@@ -514,7 +514,7 @@ func token(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		event.Help = "failure minting token: " + err.Error()
 		ssas.OperationFailed(event)
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "")
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "")
 		return
 	}
 
@@ -541,7 +541,7 @@ func tokenV2(w http.ResponseWriter, r *http.Request) {
 	if valError != "" {
 		event.Help = valError
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, valError, "")
+		service.JSONError(w, http.StatusUnauthorized, valError, "")
 		return
 	}
 
@@ -550,7 +550,7 @@ func tokenV2(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		event.Help = err.Error()
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, err.Error(), "")
+		service.JSONError(w, http.StatusUnauthorized, err.Error(), "")
 		return
 	}
 
@@ -558,21 +558,21 @@ func tokenV2(w http.ResponseWriter, r *http.Request) {
 	if claims.Subject != claims.Issuer {
 		event.Help = "subject (sub) and issuer (iss) claims do not match"
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, "subject (sub) and issuer (iss) claims do not match", "")
+		service.JSONError(w, http.StatusUnauthorized, "subject (sub) and issuer (iss) claims do not match", "")
 		return
 	}
 
 	if claims.Id == "" {
 		event.Help = "missing Token ID (jti) claim"
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, "missing Token ID (jti) claim", "")
+		service.JSONError(w, http.StatusUnauthorized, "missing Token ID (jti) claim", "")
 		return
 	}
 
 	if claims.Audience != server.GetClientAssertionAudience() {
 		event.Help = "invalid audience (aud) claim"
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, "invalid audience (aud) claim", "")
+		service.JSONError(w, http.StatusUnauthorized, "invalid audience (aud) claim", "")
 		return
 	}
 
@@ -580,7 +580,7 @@ func tokenV2(w http.ResponseWriter, r *http.Request) {
 	if tokenDuration > 300 { //5 minute max duration
 		event.Help = "IssuedAt (iat) and ExpiresAt (exp) claims are more than 5 minutes apart"
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, "IssuedAt (iat) and ExpiresAt (exp) claims are more than 5 minutes apart", "")
+		service.JSONError(w, http.StatusUnauthorized, "IssuedAt (iat) and ExpiresAt (exp) claims are more than 5 minutes apart", "")
 		return
 	}
 
@@ -588,20 +588,20 @@ func tokenV2(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		event.Help = "Macaroon does not contain system id"
 		ssas.AuthorizationFailure(event)
-		service.JsonError(w, http.StatusUnauthorized, "Macaroon does not contain system id", "")
+		service.JSONError(w, http.StatusUnauthorized, "Macaroon does not contain system id", "")
 		return
 	}
 
 	system, err := ssas.GetSystemByID(systemID)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, "invalid issuer (iss) claim. system not found", "")
+		service.JSONError(w, http.StatusUnauthorized, "invalid issuer (iss) claim. system not found", "")
 		return
 	}
 
 	data, err := ssas.XDataFor(system)
 	ssas.Logger.Infof("public.api.token: XDataFor(%d) returned '%s'", system.ID, data)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, "no group for system", "")
+		service.JSONError(w, http.StatusUnauthorized, "no group for system", "")
 		return
 	}
 
@@ -609,7 +609,7 @@ func tokenV2(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		event.Help = "failure minting token: " + err.Error()
 		ssas.OperationFailed(event)
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "")
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "")
 		return
 	}
 
@@ -671,30 +671,30 @@ func introspect(w http.ResponseWriter, r *http.Request) {
 	clientID, secret, ok := r.BasicAuth()
 
 	if !ok {
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid auth header")
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid auth header")
 		return
 	}
 
 	if clientID == "" || secret == "" {
 		msg := "empty value in clientID and/or secret"
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), msg)
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), msg)
 		return
 	}
 
 	system, err := ssas.GetSystemByClientID(clientID)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), fmt.Sprintf("invalid client id; %s", err))
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), fmt.Sprintf("invalid client id; %s", err))
 		return
 	}
 
 	savedSecret, err := system.GetSecret()
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), fmt.Sprintf("can't get secret; %s", err))
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), fmt.Sprintf("can't get secret; %s", err))
 		return
 	}
 
 	if !ssas.Hash(savedSecret.Hash).IsHashOf(secret) {
-		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid client secret")
+		service.JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid client secret")
 		return
 	}
 
@@ -702,7 +702,7 @@ func introspect(w http.ResponseWriter, r *http.Request) {
 
 	var reqV map[string]string
 	if err = json.NewDecoder(r.Body).Decode(&reqV); err != nil {
-		service.JsonError(w, http.StatusBadRequest, "invalid body", "")
+		service.JSONError(w, http.StatusBadRequest, "invalid body", "")
 		return
 	}
 	var answer = make(map[string]bool)
@@ -728,12 +728,12 @@ func validateAndParseToken(w http.ResponseWriter, r *http.Request) {
 
 	var reqV map[string]string
 	if err := json.NewDecoder(r.Body).Decode(&reqV); err != nil {
-		service.JsonError(w, http.StatusBadRequest, "invalid request body", "")
+		service.JSONError(w, http.StatusBadRequest, "invalid request body", "")
 		return
 	}
 	tokenS := reqV["token"]
 	if tokenS == "" {
-		service.JsonError(w, http.StatusUnauthorized, `missing "token" field in body`, "")
+		service.JSONError(w, http.StatusUnauthorized, `missing "token" field in body`, "")
 		return
 	}
 	var response = make(map[string]interface{})
@@ -745,7 +745,7 @@ func validateAndParseToken(w http.ResponseWriter, r *http.Request) {
 		claims := jwt.MapClaims{}
 		if _, _, err := new(jwt.Parser).ParseUnverified(tokenS, claims); err != nil {
 			ssas.Logger.Infof("could not unmarshal access token")
-			service.JsonError(w, http.StatusInternalServerError, "internal server error", "")
+			service.JSONError(w, http.StatusInternalServerError, "internal server error", "")
 			return
 		}
 		response["valid"] = true
@@ -754,7 +754,7 @@ func validateAndParseToken(w http.ResponseWriter, r *http.Request) {
 		sys, err := ssas.GetSystemByID(claims["sys"].(string))
 		if err != nil {
 			ssas.Logger.Infof("could not get system id")
-			service.JsonError(w, http.StatusInternalServerError, "internal server error", "")
+			service.JSONError(w, http.StatusInternalServerError, "internal server error", "")
 			return
 		}
 		response["scope"] = sys.APIScope

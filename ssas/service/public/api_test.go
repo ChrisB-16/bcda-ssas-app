@@ -456,7 +456,7 @@ func (s *APITestSuite) TestSaveTokenTime() {
 
 func (s *APITestSuite) TestJsonError() {
 	rr := httptest.NewRecorder()
-	service.JsonError(rr, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
+	service.JSONError(rr, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
 
 	b, _ := ioutil.ReadAll(rr.Body)
 	var error ssas.ErrorResponse
