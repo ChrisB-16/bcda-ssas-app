@@ -158,7 +158,7 @@ func updateGroup(w http.ResponseWriter, r *http.Request) {
 	ssas.OperationCalled(groupEvent)
 	g, err := ssas.UpdateGroup(id, gd)
 	if err != nil {
-		service.JsonError(w, http.StatusBadRequest, fmt.Sprintf("failed to update group; %s", err), "")
+		service.JsonError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), fmt.Sprintf("failed to update group; %s", err))
 		return
 	}
 
@@ -297,7 +297,7 @@ func deleteGroup(w http.ResponseWriter, r *http.Request) {
 	err := ssas.DeleteGroup(id)
 	if err != nil {
 		ssas.OperationFailed(ssas.Event{Op: "admin.deleteGroup", TrackingID: id, Help: err.Error()})
-		service.JsonError(w, http.StatusBadRequest, fmt.Sprintf("failed to delete group; %s", err), "")
+		service.JsonError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), fmt.Sprintf("failed to delete group; %s", err))
 		return
 	}
 
