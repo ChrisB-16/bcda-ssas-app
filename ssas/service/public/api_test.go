@@ -1042,7 +1042,7 @@ func (s *APITestSuite) TestGetTokenInfoWithMissingToken() {
 
 	handler.ServeHTTP(rr, req)
 	assert.Equal(s.T(), http.StatusUnauthorized, rr.Result().StatusCode)
-	service.JsonError(w, http.StatusUnauthorized, "", "missing \"token\" field in body")
+	service.JsonError(rr, http.StatusUnauthorized, "", "missing \"token\" field in body")
 
 	resp := rr.Result()
 	body, err := ioutil.ReadAll(resp.Body)

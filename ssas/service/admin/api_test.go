@@ -966,6 +966,8 @@ func (s *APITestSuite) TestCreateV2SystemWithMissingPublicKey() {
 
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), http.StatusBadRequest, rr.Result().StatusCode)
+	var result map[string]interface{}
+	_ = json.Unmarshal(rr.Body.Bytes(), &result)
 	assert.Empty(s.T(), result["client_token"])
 	assert.True(s.T(), json.Valid(body))
 	assert.Equal(s.T(), `{"error":"","error_description":"could not create v2 system; public key is required"}`, string(body))
