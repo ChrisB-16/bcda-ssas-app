@@ -875,7 +875,7 @@ func (s *APITestSuite) TestUpdateSystem() {
 	result = make(map[string]interface{})
 	_ = json.Unmarshal(rr.Body.Bytes(), &result)
 	assert.Equal(s.T(), http.StatusBadRequest, rr.Result().StatusCode)
-	assert.Equal(s.T(), "attribute: client_id is not valid", result["error_description"])
+	assert.Equal(s.T(), "attribute: client_id is not valid", result["error"])
 
 	//Update attributes with empty string
 	req = httptest.NewRequest("Patch", V2_SYSTEM_ROUTE+sysId, strings.NewReader(`{"api_scope": ""}`))
@@ -886,7 +886,7 @@ func (s *APITestSuite) TestUpdateSystem() {
 	result = make(map[string]interface{})
 	_ = json.Unmarshal(rr.Body.Bytes(), &result)
 	assert.Equal(s.T(), http.StatusBadRequest, rr.Result().StatusCode)
-	assert.Equal(s.T(), "attribute: api_scope may not be empty", result["error_description"])
+	assert.Equal(s.T(), "attribute: api_scope may not be empty", result["error"])
 
 	err = ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)
@@ -1042,7 +1042,7 @@ func (s *APITestSuite) TestCreateV2SystemEmptyKey() {
 	var result map[string]interface{}
 	_ = json.Unmarshal(rr.Body.Bytes(), &result)
 	assert.Empty(s.T(), result["client_token"])
-	assert.Equal(s.T(), "could not create v2 system; public key is required", result["error_description"])
+	assert.Equal(s.T(), "could not create v2 system; public key is required", result["error"])
 
 	err = ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)

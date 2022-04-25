@@ -30,5 +30,5 @@ func JsonError(w http.ResponseWriter, errorStatus int, statusText string, status
 
 	WriteHttpError(w, e, errorStatus)
 
-	ssas.Logger.Printf("%s; %s", statusDescription, statusText)
+	ssas.Logger.Printf("%s; %s", statusDescription, statusText) // TODO: log information about the request
 }
