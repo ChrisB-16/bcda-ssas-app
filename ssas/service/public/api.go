@@ -484,18 +484,18 @@ func token(w http.ResponseWriter, r *http.Request) {
 
 	system, err := ssas.GetSystemByClientID(clientID)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, "invalid client id", "")
+		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid client id")
 		return
 	}
 
 	savedSecret, err := system.GetSecret()
 	if err != nil || !ssas.Hash(savedSecret.Hash).IsHashOf(secret) {
-		service.JsonError(w, http.StatusUnauthorized, "invalid client secret", "")
+		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid client secret")
 		return
 	}
 
 	if savedSecret.IsExpired() {
-		service.JsonError(w, http.StatusUnauthorized, "credentials expired", "")
+		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "credentials expired")
 		return
 	}
 
@@ -671,30 +671,30 @@ func introspect(w http.ResponseWriter, r *http.Request) {
 	clientID, secret, ok := r.BasicAuth()
 
 	if !ok {
-		service.JsonError(w, http.StatusUnauthorized, "invalid auth header", "")
+		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid auth header")
 		return
 	}
 
 	if clientID == "" || secret == "" {
 		msg := "empty value in clientID and/or secret"
-		service.JsonError(w, http.StatusUnauthorized, msg, "")
+		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), msg)
 		return
 	}
 
 	system, err := ssas.GetSystemByClientID(clientID)
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, fmt.Sprintf("invalid client id; %s", err), "")
+		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), fmt.Sprintf("invalid client id; %s", err))
 		return
 	}
 
 	savedSecret, err := system.GetSecret()
 	if err != nil {
-		service.JsonError(w, http.StatusUnauthorized, fmt.Sprintf("can't get secret; %s", err), "")
+		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), fmt.Sprintf("can't get secret; %s", err))
 		return
 	}
 
 	if !ssas.Hash(savedSecret.Hash).IsHashOf(secret) {
-		service.JsonError(w, http.StatusUnauthorized, "invalid client secret", "")
+		service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "invalid client secret")
 		return
 	}
 
