@@ -462,7 +462,7 @@ func (s *APITestSuite) TestJsonError() {
 	var error ssas.ErrorResponse
 	_ = json.Unmarshal(b, &error)
 
-	assert.Equal(s.T(), "Unauthorized", error.ErrorText)
+	assert.Equal(s.T(), "Unauthorized", error.Error)
 	assert.Equal(s.T(), "unauthorized", error.ErrorDescription)
 }
 
