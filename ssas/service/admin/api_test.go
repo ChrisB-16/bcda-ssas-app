@@ -571,13 +571,15 @@ func (s *APITestSuite) TestDeactivateSystemCredentials() {
 }
 
 func (s *APITestSuite) TestJsonError() {
-	w := httptest.NewRecorder()
-	service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
-	resp := w.Result()
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.NoError(s.T(), err)
-	assert.True(s.T(), json.Valid(body))
-	assert.Equal(s.T(), `{"error":"Unauthorized","error_description":"unauthorized"}`, string(body))
+	rr := httptest.NewRecorder()
+	service.JsonError(rr, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
+
+	b, _ := ioutil.ReadAll(rr.Body)
+	var error ssas.ErrorResponse
+	_ = json.Unmarshal(b, &error)
+
+	assert.Equal(s.T(), "Unauthorized", error.ErrorText)
+	assert.Equal(s.T(), "unauthorized", error.ErrorDescription)
 }
 
 func (s *APITestSuite) TestGetSystemIPs() {
@@ -961,16 +963,13 @@ func (s *APITestSuite) TestCreateV2SystemWithMissingPublicKey() {
 
 	handler.ServeHTTP(rr, req)
 
-	resp := rr.Result()
-	body, err := ioutil.ReadAll(resp.Body)
-
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), http.StatusBadRequest, rr.Result().StatusCode)
+
 	var result map[string]interface{}
 	_ = json.Unmarshal(rr.Body.Bytes(), &result)
 	assert.Empty(s.T(), result["client_token"])
-	assert.True(s.T(), json.Valid(body))
-	assert.Equal(s.T(), `{"error":"","error_description":"could not create v2 system; public key is required"}`, string(body))
+	assert.Equal(s.T(), "could not create v2 system; public key is required", result["error"])
 
 	err = ssas.CleanDatabase(group)
 	assert.Nil(s.T(), err)

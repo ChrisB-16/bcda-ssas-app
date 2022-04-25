@@ -455,13 +455,15 @@ func (s *APITestSuite) TestSaveTokenTime() {
 }
 
 func (s *APITestSuite) TestJsonError() {
-	w := httptest.NewRecorder()
-	service.JsonError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
-	resp := w.Result()
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.NoError(s.T(), err)
-	assert.True(s.T(), json.Valid(body))
-	assert.Equal(s.T(), `{"error":"Unauthorized","error_description":"unauthorized"}`, string(body))
+	rr := httptest.NewRecorder()
+	service.JsonError(rr, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
+
+	b, _ := ioutil.ReadAll(rr.Body)
+	var error ssas.ErrorResponse
+	_ = json.Unmarshal(b, &error)
+
+	assert.Equal(s.T(), "Unauthorized", error.ErrorText)
+	assert.Equal(s.T(), "unauthorized", error.ErrorDescription)
 }
 
 func TestAPITestSuite(t *testing.T) {
@@ -1042,14 +1044,11 @@ func (s *APITestSuite) TestGetTokenInfoWithMissingToken() {
 
 	handler.ServeHTTP(rr, req)
 	assert.Equal(s.T(), http.StatusUnauthorized, rr.Result().StatusCode)
-	service.JsonError(rr, http.StatusUnauthorized, "", "missing \"token\" field in body")
 
-	resp := rr.Result()
-	body, err := ioutil.ReadAll(resp.Body)
-
+	var resMap map[string]string
+	err := json.NewDecoder(rr.Body).Decode(&resMap)
 	assert.NoError(s.T(), err)
-	assert.True(s.T(), json.Valid(body))
-	assert.Equal(s.T(), `{"error":"","error_description":"missing \"token\" field in body"}`, string(body))
+	assert.Equal(s.T(), "missing \"token\" field in body", resMap["error_description"])
 }
 
 func (s *APITestSuite) TestGetTokenInfoWithEmptyToken() {
