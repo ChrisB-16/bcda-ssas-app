@@ -3,8 +3,8 @@ package admin
 import (
 	"net/http"
 
-	"github.com/CMSgov/bcda-ssas-app/service"
 	"github.com/CMSgov/bcda-ssas-app/ssas"
+	"github.com/CMSgov/bcda-ssas-app/ssas/service"
 )
 
 func requireBasicAuth(next http.Handler) http.Handler {
