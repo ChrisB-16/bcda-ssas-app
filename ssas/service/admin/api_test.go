@@ -570,7 +570,7 @@ func (s *APITestSuite) TestDeactivateSystemCredentials() {
 	_ = ssas.CleanDatabase(group)
 }
 
-func (s *APITestSuite) TestJsonError() {
+func (s *APITestSuite) TestJSONError() {
 	rr := httptest.NewRecorder()
 	service.JSONError(rr, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
 

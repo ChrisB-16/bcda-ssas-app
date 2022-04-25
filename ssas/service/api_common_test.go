@@ -25,7 +25,7 @@ func (s *APICommonTestSuite) TearDownSuite() {
 	ssas.Close(s.db)
 }
 
-func (s *APICommonTestSuite) TestJsonError() {
+func (s *APICommonTestSuite) TestJSONError() {
 	// JSON output is valid for simple strings
 	w := httptest.NewRecorder()
 	JSONError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized), "unauthorized")
