@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/go-chi/chi v4.0.3-0.20190508141739-08c92af09aaf+incompatible
 	github.com/go-chi/render v1.0.1
-	github.com/golang-jwt/jwt/v4 v4.1.0
+	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/lib/pq v1.6.0
 	github.com/newrelic/go-agent/v3 v3.13.0
 	github.com/patrickmn/go-cache v2.1.1-0.20180815053127-5633e0862627+incompatible
